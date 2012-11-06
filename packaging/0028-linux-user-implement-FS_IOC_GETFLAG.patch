@@ -1,0 +1,36 @@
+From e77d8fc983222a9dec1394d864caf79f386b119a Mon Sep 17 00:00:00 2001
+From: Alexander Graf <agraf@suse.de>
+Date: Mon, 20 Aug 2012 00:02:52 +0200
+Subject: [PATCH] linux-user: implement FS_IOC_GETFLAGS ioctl
+
+Signed-off-by: Alexander Graf <agraf@suse.de>
+---
+ linux-user/ioctls.h       |    1 +
+ linux-user/syscall_defs.h |    2 ++
+ 2 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/linux-user/ioctls.h b/linux-user/ioctls.h
+index bb76c56..1b798b3 100644
+--- a/linux-user/ioctls.h
++++ b/linux-user/ioctls.h
+@@ -86,6 +86,7 @@
+      IOCTL_SPECIAL(FS_IOC_FIEMAP, IOC_W | IOC_R, do_ioctl_fs_ioc_fiemap,
+                    MK_PTR(MK_STRUCT(STRUCT_fiemap)))
+ #endif
++  IOCTL(FS_IOC_GETFLAGS, IOC_R, MK_PTR(TYPE_INT))
+ 
+   IOCTL(SIOCATMARK, 0, TYPE_NULL)
+   IOCTL(SIOCADDRT, IOC_W, MK_PTR(MK_STRUCT(STRUCT_rtentry)))
+diff --git a/linux-user/syscall_defs.h b/linux-user/syscall_defs.h
+index d708131..15b171f 100644
+--- a/linux-user/syscall_defs.h
++++ b/linux-user/syscall_defs.h
+@@ -2344,6 +2344,8 @@ struct target_eabi_flock64 {
+ #define TARGET_MTIOCGET        TARGET_IOR('m', 2, struct mtget)
+ #define TARGET_MTIOCPOS        TARGET_IOR('m', 3, struct mtpos)
+ 
++#define TARGET_FS_IOC_GETFLAGS TARGET_IORU('f', 1)
++
+ struct target_sysinfo {
+     abi_long uptime;                /* Seconds since boot */
+     abi_ulong loads[3];             /* 1, 5, and 15 minute load averages */

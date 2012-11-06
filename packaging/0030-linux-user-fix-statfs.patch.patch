@@ -1,0 +1,48 @@
+From d26d1a74112810944a891ad905244b88aa8493f6 Mon Sep 17 00:00:00 2001
+From: Alexander Graf <agraf@suse.de>
+Date: Tue, 21 Aug 2012 11:16:06 +0200
+Subject: [PATCH] linux-user: fix statfs
+
+The statfs syscall should always memset(0) its full struct extent before
+writing to it. Newer versions of the syscall use one of the reserved fields
+for flags, which would otherwise get stale values from uncleaned memory.
+
+This fixes libarchive for me, which got confused about the return value of
+pathconf("/", _PC_REC_XFER_ALIGN) otherwise, as it some times gave old pointers
+as return value.
+
+Signed-off-by: Alexander Graf <agraf@suse.de>
+---
+ linux-user/syscall.c |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
+
+diff --git a/linux-user/syscall.c b/linux-user/syscall.c
+index fc27851..9ebc585 100644
+--- a/linux-user/syscall.c
++++ b/linux-user/syscall.c
+@@ -6667,6 +6667,12 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
+             __put_user(stfs.f_fsid.__val[0], &target_stfs->f_fsid.val[0]);
+             __put_user(stfs.f_fsid.__val[1], &target_stfs->f_fsid.val[1]);
+             __put_user(stfs.f_namelen, &target_stfs->f_namelen);
++            __put_user(stfs.f_frsize, &target_stfs->f_frsize);
++            __put_user(0, &target_stfs->f_spare[0]);
++            __put_user(0, &target_stfs->f_spare[1]);
++            __put_user(0, &target_stfs->f_spare[2]);
++            __put_user(0, &target_stfs->f_spare[3]);
++            __put_user(0, &target_stfs->f_spare[4]);
+             unlock_user_struct(target_stfs, arg2, 1);
+         }
+         break;
+@@ -6695,6 +6701,12 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
+             __put_user(stfs.f_fsid.__val[0], &target_stfs->f_fsid.val[0]);
+             __put_user(stfs.f_fsid.__val[1], &target_stfs->f_fsid.val[1]);
+             __put_user(stfs.f_namelen, &target_stfs->f_namelen);
++            __put_user(stfs.f_frsize, &target_stfs->f_frsize);
++            __put_user(0, &target_stfs->f_spare[0]);
++            __put_user(0, &target_stfs->f_spare[1]);
++            __put_user(0, &target_stfs->f_spare[2]);
++            __put_user(0, &target_stfs->f_spare[3]);
++            __put_user(0, &target_stfs->f_spare[4]);
+             unlock_user_struct(target_stfs, arg3, 1);
+         }
+         break;

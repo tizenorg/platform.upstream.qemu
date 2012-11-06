@@ -1,0 +1,27 @@
+From f8f3c9eae7186bd49662efda635be42186d19f0e Mon Sep 17 00:00:00 2001
+From: Alexander Graf <agraf@suse.de>
+Date: Sun, 11 Dec 2011 01:21:51 +0100
+Subject: [PATCH] linux-user: be silent about capget failures
+
+Complaining about capget doesn't buy us anything, but makes %check
+fail in certain builds. So better not complain about its missing
+implementation and go on with life :)
+
+Signed-off-by: Alexander Graf <agraf@suse.de>
+---
+ linux-user/syscall.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/linux-user/syscall.c b/linux-user/syscall.c
+index 0da4cce..46331c7 100644
+--- a/linux-user/syscall.c
++++ b/linux-user/syscall.c
+@@ -7536,7 +7536,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
+         unlock_user(p, arg1, ret);
+         break;
+     case TARGET_NR_capget:
+-        goto unimplemented;
++        goto unimplemented_nowarn;
+     case TARGET_NR_capset:
+         goto unimplemented;
+     case TARGET_NR_sigaltstack:
