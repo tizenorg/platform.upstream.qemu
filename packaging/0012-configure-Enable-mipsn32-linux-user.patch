@@ -1,0 +1,29 @@
+From c70851ae29a0c9c6671c1c0c813e043d6468f3b2 Mon Sep 17 00:00:00 2001
+From: Ulrich Hecht <uli@suse.de>
+Date: Wed, 25 Aug 2010 14:23:43 +0200
+Subject: [PATCH] configure: Enable mipsn32*-linux-user builds
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Signed-off-by: Ulrich Hecht <uli@suse.de>
+[AF: Merged default-configs upstream]
+[AF: Merged with new or32-linux-user for v1.2]
+Signed-off-by: Andreas Färber <afaerber@suse.de>
+---
+ configure |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/configure b/configure
+index d97fd81..ebf7a6b 100755
+--- a/configure
++++ b/configure
+@@ -997,6 +997,8 @@ microblaze-linux-user \
+ microblazeel-linux-user \
+ mips-linux-user \
+ mipsel-linux-user \
++mipsn32-linux-user \
++mipsn32el-linux-user \
+ or32-linux-user \
+ ppc-linux-user \
+ ppc64-linux-user \
