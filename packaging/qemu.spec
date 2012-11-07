@@ -1,21 +1,3 @@
-#
-# spec file for package qemu
-#
-# Copyright (c) 2012 SUSE LINUX Products GmbH, Nuernberg, Germany.
-#
-# All modifications and additions to the file contributed by third parties
-# remain the property of their copyright owners, unless otherwise agreed
-# upon. The license for this file, and modifications and additions to the
-# file, is the same license as for the pristine package itself (unless the
-# license for the pristine package is not an Open Source License, in which
-# case the license is the MIT License). An "Open Source License" is a
-# license that conforms to the Open Source Definition (Version 1.9)
-# published by the Open Source Initiative.
-
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
-#
-
-
 Name:           qemu
 Url:            http://www.qemu.org/
 Summary:        Universal CPU emulator
@@ -24,39 +6,6 @@ Group:          System/Emulators/PC
 Version:        1.2.0
 Release:        0
 Source:         %name-%version.tar.bz2
-Patch0001:      0001-Handle-CPU-interrupts-by-inline-che.patch
-Patch0002:      0002-XXX-dont-dump-core-on-sigabort.patc.patch
-Patch0003:      0003-XXX-work-around-SA_RESTART-race-wit.patch
-Patch0004:      0004-qemu-0.9.0.cvs-binfmt.patch.patch
-Patch0005:      0005-qemu-cvs-alsa_bitfield.patch.patch
-Patch0006:      0006-qemu-cvs-alsa_ioctl.patch.patch
-Patch0007:      0007-qemu-cvs-alsa_mmap.patch.patch
-Patch0008:      0008-qemu-cvs-gettimeofday.patch.patch
-Patch0009:      0009-qemu-cvs-ioctl_debug.patch.patch
-Patch0010:      0010-qemu-cvs-ioctl_nodirection.patch.patch
-Patch0011:      0011-block-vmdk-Support-creation-of-SCSI.patch
-Patch0012:      0012-configure-Enable-mipsn32-linux-user.patch
-Patch0013:      0013-linux-user-add-binfmt-wrapper-for-a.patch
-Patch0014:      0014-linux-user-Ignore-timer_create-sysc.patch
-Patch0015:      0015-linux-user-be-silent-about-capget-f.patch
-Patch0016:      0016-PPC-KVM-Disable-mmu-notifier-check..patch
-Patch0017:      0017-linux-user-fix-segfault-deadlock.pa.patch
-Patch0018:      0018-linux-user-binfmt-support-host-bina.patch
-Patch0019:      0019-linux-user-arm-no-tb_flush-on-reset.patch
-Patch0020:      0020-linux-user-fix-multi-threaded-proc-.patch
-Patch0021:      0021-use-libexecdir-instead-of-ignoring-.patch
-Patch0022:      0022-linux-user-Ignore-broken-loop-ioctl.patch
-Patch0023:      0023-linux-user-fix-segmentation-fault-p.patch
-Patch0024:      0024-linux-user-lock-tcg.patch.patch
-Patch0025:      0025-linux-user-Run-multi-threaded-code-.patch
-Patch0026:      0026-linux-user-lock-tb-flushing-too.pat.patch
-Patch0027:      0027-linux-user-Fake-proc-cpuinfo.patch.patch
-Patch0028:      0028-linux-user-implement-FS_IOC_GETFLAG.patch
-Patch0029:      0029-linux-user-implement-FS_IOC_SETFLAG.patch
-Patch0030:      0030-linux-user-fix-statfs.patch.patch
-Patch0031:      0031-linux-user-XXX-disable-fiemap.patch.patch
-Patch0032:      0032-slirp-nooutgoing.patch.patch
-Patch0033:      0033-vnc-password-file-and-incoming-conn.patch
 # this is to make lint happy
 Source300:      rpmlintrc
 Source302:      bridge.conf
@@ -150,39 +99,6 @@ run cross-architecture builds.
 
 %prep
 %setup -q -n %name-%version
-%patch0001 -p1
-%patch0002 -p1
-%patch0003 -p1
-%patch0004 -p1
-%patch0005 -p1
-%patch0006 -p1
-%patch0007 -p1
-%patch0008 -p1
-%patch0009 -p1
-%patch0010 -p1
-%patch0011 -p1
-%patch0012 -p1
-%patch0013 -p1
-%patch0014 -p1
-%patch0015 -p1
-%patch0016 -p1
-%patch0017 -p1
-%patch0018 -p1
-%patch0019 -p1
-%patch0020 -p1
-%patch0021 -p1
-%patch0022 -p1
-%patch0023 -p1
-%patch0024 -p1
-%patch0025 -p1
-%patch0026 -p1
-%patch0027 -p1
-%patch0028 -p1
-%patch0029 -p1
-%patch0030 -p1
-%patch0031 -p1
-%patch0032 -p1
-%patch0033 -p1
 
 %build
 # build QEMU
