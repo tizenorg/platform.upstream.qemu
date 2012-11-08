@@ -36,7 +36,7 @@ BuildRequires:  fdupes
 BuildRequires:  glib2-devel
 #BuildRequires:  libvdeplug3-devel
 BuildRequires:  pwdutils
-BuildRequires:  python-base
+BuildRequires:  python
 Requires:       /usr/sbin/groupadd
 Requires:       pwdutils
 Requires:       timezone
