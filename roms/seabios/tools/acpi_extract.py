@@ -93,7 +93,7 @@ def aml_pkglen(offset):
     pkglenbytes = aml_pkglen_bytes(offset)
     pkglen = aml[offset] & 0x3F
     # If multibyte, first nibble only uses bits 0-3
-    if ((pkglenbytes > 0) and (pkglen & 0x30)):
+    if ((pkglenbytes > 1) and (pkglen & 0x30)):
         die("PkgLen bytes 0x%x but first nibble 0x%x expected 0x0X" %
             (pkglen, pkglen))
     offset += 1
@@ -163,6 +163,28 @@ def aml_name_word_const(offset):
 # Given name offset, find byte const offset
 def aml_name_byte_const(offset):
     return aml_data_byte_const(aml_name_string(offset) + 4)
+
+def aml_device_start(offset):
+    #0x5B 0x82 DeviceOp PkgLength NameString
+    if ((aml[offset] != 0x5B) or (aml[offset + 1] != 0x82)):
+        die( "Name offset 0x%x: expected 0x5B 0x82 actual 0x%x 0x%x" %
+             (offset, aml[offset], aml[offset + 1]));
+    return offset
+
+def aml_device_string(offset):
+    #0x5B 0x82 DeviceOp PkgLength NameString
+    start = aml_device_start(offset)
+    offset += 2
+    pkglenbytes = aml_pkglen_bytes(offset)
+    offset += pkglenbytes
+    return offset
+
+def aml_device_end(offset):
+    start = aml_device_start(offset)
+    offset += 2
+    pkglenbytes = aml_pkglen_bytes(offset)
+    pkglen = aml_pkglen(offset)
+    return offset + pkglen
 
 def aml_processor_start(offset):
     #0x5B 0x83 ProcessorOp PkgLength NameString ProcID
@@ -271,6 +293,12 @@ for i in range(len(asl)):
         offset = aml_name_string(offset)
     elif (directive == "ACPI_EXTRACT_METHOD_STRING"):
         offset = aml_method_string(offset)
+    elif (directive == "ACPI_EXTRACT_DEVICE_START"):
+        offset = aml_device_start(offset)
+    elif (directive == "ACPI_EXTRACT_DEVICE_STRING"):
+        offset = aml_device_string(offset)
+    elif (directive == "ACPI_EXTRACT_DEVICE_END"):
+        offset = aml_device_end(offset)
     elif (directive == "ACPI_EXTRACT_PROCESSOR_START"):
         offset = aml_processor_start(offset)
     elif (directive == "ACPI_EXTRACT_PROCESSOR_STRING"):

@@ -86,7 +86,10 @@ DefinitionBlock (
 #define prt_slot3(nr) prt_slot(nr, LNKC, LNKD, LNKA, LNKB)
                prt_slot0(0x0000),
                /* Device 1 is power mgmt device, and can only use irq 9 */
-               prt_slot(0x0001, LNKS, LNKB, LNKC, LNKD),
+               Package() { 0x1ffff, 0,    0, 9 },
+               Package() { 0x1ffff, 1, LNKB, 0 },
+               Package() { 0x1ffff, 2, LNKC, 0 },
+               Package() { 0x1ffff, 3, LNKD, 0 },
                prt_slot2(0x0002),
                prt_slot3(0x0003),
                prt_slot0(0x0004),
@@ -266,15 +269,11 @@ DefinitionBlock (
                     Return (0x0F)
             }
             Name(_CRS, ResourceTemplate() {
-                DWordMemory(
-                    ResourceConsumer, PosDecode, MinFixed, MaxFixed,
-                    NonCacheable, ReadWrite,
-                    0x00000000,
-                    0xFED00000,
-                    0xFED003FF,
-                    0x00000000,
-                    0x00000400 /* 1K memory: FED00000 - FED003FF */
-                )
+                IRQNoFlags () {2, 8}
+                Memory32Fixed (ReadOnly,
+                    0xFED00000,         // Address Base
+                    0x00000400,         // Address Length
+                    )
             })
         }
     }
@@ -556,7 +555,6 @@ DefinitionBlock (
                     PCNT(Local0, 3)
                 }
             }
-            Return(One)
         }
 
     }
@@ -651,17 +649,6 @@ DefinitionBlock (
             Method (_CRS, 0, NotSerialized) { Return (IQCR(PRQ3)) }
             Method (_SRS, 1, NotSerialized) { SETIRQ(PRQ3, Arg0) }
         }
-        Device(LNKS) {
-            Name(_HID, EISAID("PNP0C0F"))     // PCI interrupt link
-            Name(_UID, 5)
-            Name(_PRS, ResourceTemplate() {
-                Interrupt (, Level, ActiveHigh, Shared)
-                    { 9 }
-            })
-            Method (_STA, 0, NotSerialized) { Return (IQST(PRQ0)) }
-            Method (_DIS, 0, NotSerialized) { DISIRQ(PRQ0) }
-            Method (_CRS, 0, NotSerialized) { Return (IQCR(PRQ0)) }
-        }
     }
 
 /****************************************************************
@@ -737,7 +724,6 @@ DefinitionBlock (
                 }
                 Increment(Local0)
             }
-            Return(One)
         }
     }
 
@@ -751,54 +737,40 @@ DefinitionBlock (
         Name(_HID, "ACPI0006")
 
         Method(_L00) {
-            Return(0x01)
         }
         Method(_E01) {
             // PCI hotplug event
-            Return(\_SB.PCI0.PCNF())
+            \_SB.PCI0.PCNF()
         }
         Method(_E02) {
             // CPU hotplug event
-            Return(\_SB.PRSC())
+            \_SB.PRSC()
         }
         Method(_L03) {
-            Return(0x01)
         }
         Method(_L04) {
-            Return(0x01)
         }
         Method(_L05) {
-            Return(0x01)
         }
         Method(_L06) {
-            Return(0x01)
         }
         Method(_L07) {
-            Return(0x01)
         }
         Method(_L08) {
-            Return(0x01)
         }
         Method(_L09) {
-            Return(0x01)
         }
         Method(_L0A) {
-            Return(0x01)
         }
         Method(_L0B) {
-            Return(0x01)
         }
         Method(_L0C) {
-            Return(0x01)
         }
         Method(_L0D) {
-            Return(0x01)
         }
         Method(_L0E) {
-            Return(0x01)
         }
         Method(_L0F) {
-            Return(0x01)
         }
     }
 }

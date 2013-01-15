@@ -119,16 +119,6 @@ static void piix_isa_bridge_init(struct pci_device *pci, void *arg)
     dprintf(1, "PIIX3/PIIX4 init: elcr=%02x %02x\n", elcr[0], elcr[1]);
 }
 
-static const struct pci_device_id pci_isa_bridge_tbl[] = {
-    /* PIIX3/PIIX4 PCI to ISA bridge */
-    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371SB_0,
-               piix_isa_bridge_init),
-    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_0,
-               piix_isa_bridge_init),
-
-    PCI_DEVICE_END
-};
-
 static void storage_ide_init(struct pci_device *pci, void *arg)
 {
     /* IDE: we map it as in ISA mode */
@@ -158,7 +148,31 @@ static void apple_macio_init(struct pci_device *pci, void *arg)
     pci_set_io_region_addr(pci, 0, 0x80800000, 0);
 }
 
-static const struct pci_device_id pci_class_tbl[] = {
+/* PM Timer ticks per second (HZ) */
+#define PM_TIMER_FREQUENCY  3579545
+
+/* PIIX4 Power Management device (for ACPI) */
+static void piix4_pm_init(struct pci_device *pci, void *arg)
+{
+    u16 bdf = pci->bdf;
+    // acpi sci is hardwired to 9
+    pci_config_writeb(bdf, PCI_INTERRUPT_LINE, 9);
+
+    pci_config_writel(bdf, 0x40, PORT_ACPI_PM_BASE | 1);
+    pci_config_writeb(bdf, 0x80, 0x01); /* enable PM io space */
+    pci_config_writel(bdf, 0x90, PORT_SMB_BASE | 1);
+    pci_config_writeb(bdf, 0xd2, 0x09); /* enable SMBus io space */
+
+    pmtimer_init(PORT_ACPI_PM_BASE + 0x08, PM_TIMER_FREQUENCY / 1000);
+}
+
+static const struct pci_device_id pci_device_tbl[] = {
+    /* PIIX3/PIIX4 PCI to ISA bridge */
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371SB_0,
+               piix_isa_bridge_init),
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_0,
+               piix_isa_bridge_init),
+
     /* STORAGE IDE */
     PCI_DEVICE_CLASS(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371SB_1,
                      PCI_CLASS_STORAGE_IDE, piix_ide_init),
@@ -173,30 +187,13 @@ static const struct pci_device_id pci_class_tbl[] = {
     PCI_DEVICE_CLASS(PCI_VENDOR_ID_IBM, 0xFFFF, PCI_CLASS_SYSTEM_PIC,
                      pic_ibm_init),
 
-    /* 0xff00 */
-    PCI_DEVICE_CLASS(PCI_VENDOR_ID_APPLE, 0x0017, 0xff00, apple_macio_init),
-    PCI_DEVICE_CLASS(PCI_VENDOR_ID_APPLE, 0x0022, 0xff00, apple_macio_init),
-
-    PCI_DEVICE_END,
-};
-
-/* PIIX4 Power Management device (for ACPI) */
-static void piix4_pm_init(struct pci_device *pci, void *arg)
-{
-    u16 bdf = pci->bdf;
-    // acpi sci is hardwired to 9
-    pci_config_writeb(bdf, PCI_INTERRUPT_LINE, 9);
-
-    pci_config_writel(bdf, 0x40, PORT_ACPI_PM_BASE | 1);
-    pci_config_writeb(bdf, 0x80, 0x01); /* enable PM io space */
-    pci_config_writel(bdf, 0x90, PORT_SMB_BASE | 1);
-    pci_config_writeb(bdf, 0xd2, 0x09); /* enable SMBus io space */
-}
-
-static const struct pci_device_id pci_device_tbl[] = {
     /* PIIX4 Power Management device (for ACPI) */
     PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_3,
                piix4_pm_init),
+
+    /* 0xff00 */
+    PCI_DEVICE_CLASS(PCI_VENDOR_ID_APPLE, 0x0017, 0xff00, apple_macio_init),
+    PCI_DEVICE_CLASS(PCI_VENDOR_ID_APPLE, 0x0022, 0xff00, apple_macio_init),
 
     PCI_DEVICE_END,
 };
@@ -208,17 +205,15 @@ static void pci_bios_init_device(struct pci_device *pci)
             , pci_bdf_to_bus(bdf), pci_bdf_to_dev(bdf), pci_bdf_to_fn(bdf)
             , pci->vendor, pci->device);
 
-    pci_init_device(pci_class_tbl, pci, NULL);
-
-    /* enable memory mappings */
-    pci_config_maskw(bdf, PCI_COMMAND, 0, PCI_COMMAND_IO | PCI_COMMAND_MEMORY);
-
     /* map the interrupt */
     int pin = pci_config_readb(bdf, PCI_INTERRUPT_PIN);
     if (pin != 0)
         pci_config_writeb(bdf, PCI_INTERRUPT_LINE, pci_slot_get_irq(pci, pin));
 
     pci_init_device(pci_device_tbl, pci, NULL);
+
+    /* enable memory mappings */
+    pci_config_maskw(bdf, PCI_COMMAND, 0, PCI_COMMAND_IO | PCI_COMMAND_MEMORY);
 }
 
 static void pci_bios_init_devices(void)
@@ -227,9 +222,32 @@ static void pci_bios_init_devices(void)
     foreachpci(pci) {
         pci_bios_init_device(pci);
     }
+}
 
+
+/****************************************************************
+ * Platform device initialization
+ ****************************************************************/
+
+void i440fx_mem_addr_init(struct pci_device *dev, void *arg)
+{
+    if (RamSize <= 0x80000000)
+        pcimem_start = 0x80000000;
+    else if (RamSize <= 0xc0000000)
+        pcimem_start = 0xc0000000;
+}
+
+static const struct pci_device_id pci_platform_tbl[] = {
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82441,
+               i440fx_mem_addr_init),
+    PCI_DEVICE_END
+};
+
+static void pci_bios_init_platform(void)
+{
+    struct pci_device *pci;
     foreachpci(pci) {
-        pci_init_device(pci_isa_bridge_tbl, pci, NULL);
+        pci_init_device(pci_platform_tbl, pci, NULL);
     }
 }
 
@@ -592,8 +610,6 @@ static void pci_region_map_entries(struct pci_bus *busses, struct pci_region *r)
 
 static void pci_bios_map_devices(struct pci_bus *busses)
 {
-    pcimem_start = RamSize;
-
     if (pci_bios_init_root_regions(busses)) {
         struct pci_region r64_mem, r64_pref;
         r64_mem.list = NULL;
@@ -655,6 +671,9 @@ pci_setup(void)
 
     dprintf(1, "=== PCI device probing ===\n");
     pci_probe_devices();
+
+    pcimem_start = RamSize;
+    pci_bios_init_platform();
 
     dprintf(1, "=== PCI new allocation pass #1 ===\n");
     struct pci_bus *busses = malloc_tmp(sizeof(*busses) * (MaxPCIBus + 1));

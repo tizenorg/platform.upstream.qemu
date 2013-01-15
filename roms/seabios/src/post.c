@@ -28,7 +28,8 @@
 #include "virtio-blk.h" // virtio_blk_setup
 #include "virtio-scsi.h" // virtio_scsi_setup
 #include "lsi-scsi.h" // lsi_scsi_setup
-
+#include "esp-scsi.h" // esp_scsi_setup
+#include "megasas.h" // megasas_setup
 
 /****************************************************************
  * BIOS init
@@ -196,6 +197,8 @@ init_hw(void)
     virtio_blk_setup();
     virtio_scsi_setup();
     lsi_scsi_setup();
+    esp_scsi_setup();
+    megasas_setup();
 }
 
 // Begin the boot process by invoking an int0x19 in 16bit mode.

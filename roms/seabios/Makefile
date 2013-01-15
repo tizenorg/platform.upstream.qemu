@@ -13,7 +13,7 @@ SRCBOTH=misc.c stacks.c pmm.c output.c util.c block.c floppy.c ata.c mouse.c \
     pnpbios.c pirtable.c vgahooks.c ramdisk.c pcibios.c blockcmd.c \
     usb.c usb-uhci.c usb-ohci.c usb-ehci.c usb-hid.c usb-msc.c \
     virtio-ring.c virtio-pci.c virtio-blk.c virtio-scsi.c apm.c ahci.c \
-    usb-uas.c lsi-scsi.c
+    usb-uas.c lsi-scsi.c esp-scsi.c megasas.c
 SRC16=$(SRCBOTH) system.c disk.c font.c
 SRC32FLAT=$(SRCBOTH) post.c shadow.c memmap.c coreboot.c boot.c \
     acpi.c smm.c mptable.c smbios.c pciinit.c optionroms.c mtrr.c \
@@ -75,6 +75,7 @@ all: $(target-y)
 
 # Make definitions
 .PHONY : all clean distclean FORCE
+.DELETE_ON_ERROR:
 
 vpath %.c src vgasrc
 vpath %.S src vgasrc
@@ -221,7 +222,7 @@ $(OUT)vgabios.bin: $(OUT)vgabios.bin.raw tools/buildrom.py
 
 ################ DSDT build rules
 
-iasl-option=$(shell if "$(1)" "$(2)" -h > /dev/null 2>&1 \
+iasl-option=$(shell if test -z "`$(1) $(2) 2>&1 > /dev/null`" \
     ; then echo "$(2)"; else echo "$(3)"; fi ;)
 
 $(OUT)%.hex: src/%.dsl ./tools/acpi_extract_preprocess.py ./tools/acpi_extract.py
@@ -232,7 +233,7 @@ $(OUT)%.hex: src/%.dsl ./tools/acpi_extract_preprocess.py ./tools/acpi_extract.p
 	$(Q)$(PYTHON) ./tools/acpi_extract.py $(OUT)$*.lst > $(OUT)$*.off
 	$(Q)cat $(OUT)$*.off > $@
 
-$(OUT)ccode32flat.o: $(OUT)acpi-dsdt.hex $(OUT)ssdt-proc.hex $(OUT)ssdt-pcihp.hex
+$(OUT)ccode32flat.o: $(OUT)acpi-dsdt.hex $(OUT)ssdt-proc.hex $(OUT)ssdt-pcihp.hex $(OUT)ssdt-susp.hex
 
 ################ Kconfig rules
 
