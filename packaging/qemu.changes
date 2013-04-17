@@ -1,3 +1,6 @@
+* Wed Apr 17 2013 Patrick McCarty <patrick.mccarty@linux.intel.com> 1127a7e
+- (TZPC-970) Enable SDL display support
+
 * Tue Jan 15 2013 Anas Nashif <anas.nashif@intel.com> upstream/1.3.0@4698b64
 - Update to 1.3
 
