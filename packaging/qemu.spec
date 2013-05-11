@@ -161,6 +161,7 @@ rm -rf ${RPM_BUILD_ROOT}
   -c "qemu user" qemu
 
 %files
+%license COPYING
 %defattr(-, root, root)
 %doc COPYING COPYING.LIB Changelog README TODO VERSION 
 %_bindir/qemu-system-*
