@@ -1,8 +1,8 @@
 Name:           qemu
 Url:            http://www.qemu.org/
 Summary:        Universal CPU emulator
-License:        BSD-3-Clause ; GPL-2.0+ ; LGPL-2.1+ ; MIT
-Group:          System/GUI/Other
+License:        BSD-3-Clause and GPL-2.0 and GPL-2.0+ and LGPL-2.1+ and MIT
+Group:          System/Utilities
 Version:        1.3.0
 Release:        0
 Source:         %name-%version.tar.bz2
@@ -51,7 +51,6 @@ as PC and PowerMac systems.
 
 %package tools
 Summary:        Universal CPU emulator -- Tools
-Group:          System/GUI/Other
 Provides:       qemu:%_libexecdir/qemu-bridge-helper
 
 %description tools
@@ -65,7 +64,6 @@ This sub-package contains various tools, including a bridge helper.
 
 %package guest-agent
 Summary:        Universal CPU emulator -- Guest agent
-Group:          System/GUI/Other
 Provides:       qemu:%_bindir/qemu-ga
 
 %description guest-agent
@@ -79,7 +77,6 @@ This sub-package contains the guest agent.
 
 %package linux-user
 Summary:        Universal CPU emulator -- Linux User binaries
-Group:          System/GUI/Other
 Provides:       qemu:%_bindir/qemu-arm
 
 %description linux-user
