@@ -1,3 +1,8 @@
+* Wed Aug 28 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130828.112706@2c24165
+- add baselibs.conf
+- fixed group and license
+- resetting manifest requested domain to floor
+
 * Sat May 11 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130509.183841@5388c0d
 - Set license using %license
 
