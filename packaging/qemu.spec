@@ -9,8 +9,8 @@ Source:         %name-%version.tar.bz2
 # this is to make lint happy
 Source300:      rpmlintrc
 Source302:      bridge.conf
+Source303:      baselibs.conf
 Source400:      update_git.sh
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  bison
 BuildRequires:  curl-devel
 BuildRequires:  e2fsprogs-devel
@@ -19,7 +19,6 @@ BuildRequires:  libcap-devel
 BuildRequires:  libcap-ng-devel
 BuildRequires:  libgnutls-devel
 BuildRequires:  libjpeg8-devel
-#BuildRequires:  libpcap-devel
 BuildRequires:  libpng-devel
 BuildRequires:  ncurses-devel
 # we must not install the qemu package when under qemu build
@@ -29,12 +28,10 @@ BuildRequires:  -post-build-checks
 BuildRequires:  zlib-devel-static
 BuildRequires:  glibc-devel-static
 BuildRequires:  libattr-devel-static
-#BuildRequires:  libfdt1-devel
 BuildRequires:  glib2-devel-static
 BuildRequires:  pcre-devel-static
 BuildRequires:  fdupes
 BuildRequires:  glib2-devel
-#BuildRequires:  libvdeplug3-devel
 BuildRequires:  pwdutils
 BuildRequires:  python
 BuildRequires:  pkgconfig(sdl)
