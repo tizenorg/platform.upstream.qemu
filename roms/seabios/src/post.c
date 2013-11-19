@@ -73,8 +73,6 @@ init_ivt(void)
     // set vector 0x79 to zero
     // this is used by 'gardian angel' protection system
     SET_IVT(0x79, SEGOFF(0, 0));
-
-    SET_IVT(0x1E, SEGOFF(SEG_BIOS, (u32)&diskette_param_table2 - BUILD_BIOS_ADDR));
 }
 
 static void
@@ -232,12 +230,12 @@ maininit(void)
     timer_setup();
     mathcp_setup();
 
-    // Initialize mtrr
-    mtrr_setup();
-
     // Initialize pci
     pci_setup();
     smm_init();
+
+    // Initialize mtrr
+    mtrr_setup();
 
     // Setup Xen hypercalls
     xen_init_hypercalls();
@@ -262,6 +260,9 @@ maininit(void)
 
     // Run vga option rom
     vga_setup();
+
+    // SMBIOS tables and VGA console are ready, print UUID
+    display_uuid();
 
     // Do hardware initialization (if running synchronously)
     if (!CONFIG_THREADS || !CONFIG_THREAD_OPTIONROMS) {

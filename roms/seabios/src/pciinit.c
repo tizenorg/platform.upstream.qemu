@@ -12,6 +12,11 @@
 #include "ioport.h" // PORT_ATA1_CMD_BASE
 #include "config.h" // CONFIG_*
 #include "xen.h" // usingXen
+#include "memmap.h" // add_e820
+#include "dev-q35.h"
+
+/* PM Timer ticks per second (HZ) */
+#define PM_TIMER_FREQUENCY  3579545
 
 #define PCI_DEVICE_MEM_MIN     0x1000
 #define PCI_BRIDGE_IO_MIN      0x1000
@@ -86,8 +91,18 @@ const u8 pci_irqs[4] = {
     10, 10, 11, 11
 };
 
+static int dummy_pci_slot_get_irq(struct pci_device *pci, int pin)
+{
+    dprintf(1, "pci_slot_get_irq called with unknown routing\n");
+
+    return 0xff; /* PCI defined "unknown" or "no connection" for x86 */
+}
+
+static int (*pci_slot_get_irq)(struct pci_device *pci, int pin) =
+    dummy_pci_slot_get_irq;
+
 // Return the global irq number corresponding to a host bus device irq pin.
-static int pci_slot_get_irq(struct pci_device *pci, int pin)
+static int piix_pci_slot_get_irq(struct pci_device *pci, int pin)
 {
     int slot_addend = 0;
 
@@ -97,6 +112,31 @@ static int pci_slot_get_irq(struct pci_device *pci, int pin)
     }
     slot_addend += pci_bdf_to_dev(pci->bdf) - 1;
     return pci_irqs[(pin - 1 + slot_addend) & 3];
+}
+
+static int mch_pci_slot_get_irq(struct pci_device *pci, int pin)
+{
+    int irq, slot, pin_addend = 0;
+
+    while (pci->parent != NULL) {
+        pin_addend += pci_bdf_to_dev(pci->bdf);
+        pci = pci->parent;
+    }
+    slot = pci_bdf_to_dev(pci->bdf);
+
+    switch (slot) {
+    /* Slots 0-24 rotate slot:pin mapping similar to piix above, but
+       with a different starting index - see q35-acpi-dsdt.dsl */
+    case 0 ... 24:
+        irq = pci_irqs[(pin - 1 + pin_addend + slot) & 3];
+        break;
+    /* Slots 25-31 all use LNKA mapping (or LNKE, but A:D = E:H) */
+    case 25 ... 31:
+        irq = pci_irqs[(pin - 1 + pin_addend) & 3];
+        break;
+    }
+
+    return irq;
 }
 
 /* PIIX3/PIIX4 PCI to ISA bridge */
@@ -117,6 +157,43 @@ static void piix_isa_bridge_init(struct pci_device *pci, void *arg)
     outb(elcr[0], 0x4d0);
     outb(elcr[1], 0x4d1);
     dprintf(1, "PIIX3/PIIX4 init: elcr=%02x %02x\n", elcr[0], elcr[1]);
+}
+
+/* ICH9 LPC PCI to ISA bridge */
+/* PCI_VENDOR_ID_INTEL && PCI_DEVICE_ID_INTEL_ICH9_LPC */
+void mch_isa_bridge_init(struct pci_device *dev, void *arg)
+{
+    u16 bdf = dev->bdf;
+    int i, irq;
+    u8 elcr[2];
+
+    elcr[0] = 0x00;
+    elcr[1] = 0x00;
+
+    for (i = 0; i < 4; i++) {
+        irq = pci_irqs[i];
+        /* set to trigger level */
+        elcr[irq >> 3] |= (1 << (irq & 7));
+
+        /* activate irq remapping in LPC */
+
+        /* PIRQ[A-D] routing */
+        pci_config_writeb(bdf, ICH9_LPC_PIRQA_ROUT + i, irq);
+        /* PIRQ[E-H] routing */
+        pci_config_writeb(bdf, ICH9_LPC_PIRQE_ROUT + i, irq);
+    }
+    outb(elcr[0], ICH9_LPC_PORT_ELCR1);
+    outb(elcr[1], ICH9_LPC_PORT_ELCR2);
+    dprintf(1, "Q35 LPC init: elcr=%02x %02x\n", elcr[0], elcr[1]);
+
+    /* pm io base */
+    pci_config_writel(bdf, ICH9_LPC_PMBASE,
+                      PORT_ACPI_PM_BASE | ICH9_LPC_PMBASE_RTE);
+
+    /* acpi enable, SCI: IRQ9 000b = irq9*/
+    pci_config_writeb(bdf, ICH9_LPC_ACPI_CTRL, ICH9_LPC_ACPI_CTRL_ACPI_EN);
+
+    pmtimer_init(PORT_ACPI_PM_BASE + 0x08, PM_TIMER_FREQUENCY / 1000);
 }
 
 static void storage_ide_init(struct pci_device *pci, void *arg)
@@ -148,9 +225,6 @@ static void apple_macio_init(struct pci_device *pci, void *arg)
     pci_set_io_region_addr(pci, 0, 0x80800000, 0);
 }
 
-/* PM Timer ticks per second (HZ) */
-#define PM_TIMER_FREQUENCY  3579545
-
 /* PIIX4 Power Management device (for ACPI) */
 static void piix4_pm_init(struct pci_device *pci, void *arg)
 {
@@ -166,12 +240,27 @@ static void piix4_pm_init(struct pci_device *pci, void *arg)
     pmtimer_init(PORT_ACPI_PM_BASE + 0x08, PM_TIMER_FREQUENCY / 1000);
 }
 
+/* ICH9 SMBUS */
+/* PCI_VENDOR_ID_INTEL && PCI_DEVICE_ID_INTEL_ICH9_SMBUS */
+void ich9_smbus_init(struct pci_device *dev, void *arg)
+{
+    u16 bdf = dev->bdf;
+    /* map smbus into io space */
+    pci_config_writel(bdf, ICH9_SMB_SMB_BASE,
+                      PORT_SMB_BASE | PCI_BASE_ADDRESS_SPACE_IO);
+
+    /* enable SMBus */
+    pci_config_writeb(bdf, ICH9_SMB_HOSTC, ICH9_SMB_HOSTC_HST_EN);
+}
+
 static const struct pci_device_id pci_device_tbl[] = {
     /* PIIX3/PIIX4 PCI to ISA bridge */
     PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371SB_0,
                piix_isa_bridge_init),
     PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_0,
                piix_isa_bridge_init),
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH9_LPC,
+               mch_isa_bridge_init),
 
     /* STORAGE IDE */
     PCI_DEVICE_CLASS(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371SB_1,
@@ -190,6 +279,8 @@ static const struct pci_device_id pci_device_tbl[] = {
     /* PIIX4 Power Management device (for ACPI) */
     PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82371AB_3,
                piix4_pm_init),
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_ICH9_SMBUS,
+               ich9_smbus_init),
 
     /* 0xff00 */
     PCI_DEVICE_CLASS(PCI_VENDOR_ID_APPLE, 0x0017, 0xff00, apple_macio_init),
@@ -213,7 +304,8 @@ static void pci_bios_init_device(struct pci_device *pci)
     pci_init_device(pci_device_tbl, pci, NULL);
 
     /* enable memory mappings */
-    pci_config_maskw(bdf, PCI_COMMAND, 0, PCI_COMMAND_IO | PCI_COMMAND_MEMORY);
+    pci_config_maskw(bdf, PCI_COMMAND, 0,
+                     PCI_COMMAND_IO | PCI_COMMAND_MEMORY | PCI_COMMAND_SERR);
 }
 
 static void pci_bios_init_devices(void)
@@ -235,11 +327,35 @@ void i440fx_mem_addr_init(struct pci_device *dev, void *arg)
         pcimem_start = 0x80000000;
     else if (RamSize <= 0xc0000000)
         pcimem_start = 0xc0000000;
+
+    pci_slot_get_irq = piix_pci_slot_get_irq;
+}
+
+void mch_mem_addr_init(struct pci_device *dev, void *arg)
+{
+    u64 addr = Q35_HOST_BRIDGE_PCIEXBAR_ADDR;
+    u32 size = Q35_HOST_BRIDGE_PCIEXBAR_SIZE;
+
+    /* setup mmconfig */
+    u16 bdf = dev->bdf;
+    u32 upper = addr >> 32;
+    u32 lower = (addr & 0xffffffff) | Q35_HOST_BRIDGE_PCIEXBAREN;
+    pci_config_writel(bdf, Q35_HOST_BRIDGE_PCIEXBAR, 0);
+    pci_config_writel(bdf, Q35_HOST_BRIDGE_PCIEXBAR + 4, upper);
+    pci_config_writel(bdf, Q35_HOST_BRIDGE_PCIEXBAR, lower);
+    add_e820(addr, size, E820_RESERVED);
+
+    /* setup pci i/o window (above mmconfig) */
+    pcimem_start = addr + size;
+
+    pci_slot_get_irq = mch_pci_slot_get_irq;
 }
 
 static const struct pci_device_id pci_platform_tbl[] = {
     PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_82441,
                i440fx_mem_addr_init),
+    PCI_DEVICE(PCI_VENDOR_ID_INTEL, PCI_DEVICE_ID_INTEL_Q35_MCH,
+               mch_mem_addr_init),
     PCI_DEVICE_END
 };
 

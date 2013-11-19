@@ -228,6 +228,7 @@ int bootprio_find_usb(struct usbdevice_s *usbdev, int lun)
  * Boot setup
  ****************************************************************/
 
+static int BootRetryTime;
 static int CheckFloppySig = 1;
 
 #define DEFAULT_PRIO           9999
@@ -264,6 +265,8 @@ boot_setup(void)
         }
     }
 
+    BootRetryTime = romfile_loadint("etc/boot-fail-wait", 60*1000);
+
     loadBootOrder();
 }
 
@@ -291,6 +294,7 @@ static struct bootentry_s *BootList;
 #define IPL_TYPE_CBFS        0x20
 #define IPL_TYPE_BEV         0x80
 #define IPL_TYPE_BCV         0x81
+#define IPL_TYPE_HALT        0xf0
 
 static void
 bootentry_add(int type, int prio, u32 data, const char *desc)
@@ -400,7 +404,7 @@ interactive_bootmenu(void)
     while (get_keystroke(0) >= 0)
         ;
 
-    printf("Press F12 for boot menu.\n\n");
+    printf("\nPress F12 for boot menu.\n\n");
 
     u32 menutime = romfile_loadint("etc/boot-menu-wait", DEFAULT_BOOTMENU_WAIT);
     enable_bootsplash();
@@ -487,6 +491,10 @@ boot_prep(void)
     // Allow user to modify BCV/IPL order.
     interactive_bootmenu();
     wait_threads();
+
+    int haltprio = find_prio("HALT");
+    if (haltprio >= 0)
+        bootentry_add(IPL_TYPE_HALT, haltprio, 0, "HALT");
 
     // Map drives and populate BEV list
     struct bootentry_s *pos = BootList;
@@ -623,15 +631,15 @@ boot_rom(u32 vector)
 static void
 boot_fail(void)
 {
-    u32 retrytime = romfile_loadint("etc/boot-fail-wait", 60*1000);
-    if (retrytime == (u32)-1)
+    if (BootRetryTime == (u32)-1)
         printf("No bootable device.\n");
     else
-        printf("No bootable device.  Retrying in %d seconds.\n", retrytime/1000);
-    // Wait for 'retrytime' milliseconds and then reboot.
-    u32 end = calc_future_timer(retrytime);
+        printf("No bootable device.  Retrying in %d seconds.\n"
+               , BootRetryTime/1000);
+    // Wait for 'BootRetryTime' milliseconds and then reboot.
+    u32 end = calc_future_timer(BootRetryTime);
     for (;;) {
-        if (retrytime != (u32)-1 && check_timer(end))
+        if (BootRetryTime != (u32)-1 && check_timer(end))
             break;
         yield_toirq();
     }
@@ -671,6 +679,9 @@ do_boot(int seq_nr)
         break;
     case IPL_TYPE_BEV:
         boot_rom(ie->vector);
+        break;
+    case IPL_TYPE_HALT:
+        boot_fail();
         break;
     }
 
