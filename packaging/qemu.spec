@@ -3,7 +3,7 @@ Url:            http://www.qemu.org/
 Summary:        Universal CPU emulator
 License:        BSD-3-Clause and GPL-2.0 and GPL-2.0+ and LGPL-2.1+ and MIT
 Group:          System/Utilities
-Version:        1.3.0
+Version:        1.6.0
 Release:        0
 Source:         %name-%version.tar.bz2
 # this is to make lint happy
@@ -157,7 +157,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %files
 %license COPYING
 %defattr(-, root, root)
-%doc COPYING COPYING.LIB Changelog README TODO VERSION 
+%doc COPYING COPYING.LIB Changelog README VERSION
 %_bindir/qemu-system-*
 %_datadir/%name
 %ifnarch %ix86 x86_64 ia64
@@ -191,6 +191,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %_bindir/qemu-microblaze
 %_bindir/qemu-microblazeel
 %_bindir/qemu-mips
+%_bindir/qemu-mips64
+%_bindir/qemu-mips64el
 %_bindir/qemu-mipsel
 %_bindir/qemu-mipsn32
 %_bindir/qemu-mipsn32el
