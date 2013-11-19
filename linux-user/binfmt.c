@@ -7,6 +7,8 @@
 
 #ifdef __x86_64__
 #define ARCH_NAME "x86_64"
+#elif defined __i386__
+#define ARCH_NAME "i586"
 #endif
 
 int main(int argc, char **argv, char **envp)
