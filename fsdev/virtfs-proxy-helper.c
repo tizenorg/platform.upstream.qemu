@@ -19,7 +19,6 @@ typedef unsigned long long __u64;
 #include <sys/resource.h>
 #include <getopt.h>
 #include <syslog.h>
-#include <sys/capability.h>
 #include <sys/fsuid.h>
 #include <sys/vfs.h>
 #include <sys/ioctl.h>
@@ -30,6 +29,7 @@ typedef unsigned long long __u64;
 #include "qemu-common.h"
 #include "qemu/sockets.h"
 #include "qemu/xattr.h"
+#include <sys/capability.h>
 #include "virtio-9p-marshal.h"
 #include "hw/9pfs/virtio-9p-proxy.h"
 #include "fsdev/virtio-9p-marshal.h"
