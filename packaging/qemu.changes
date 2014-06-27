@@ -1,0 +1,88 @@
+* Fri Jun 27 2014 Chanho Park <chanho61.park@samsung.com> upstream/1.6.0-71-gdddaa1a
+- Import upstream 1.6.0.
+- Imported Upstream version 2.0.0
+- XXX dont dump core on sigabort
+- XXX work around SA_RESTART race with boehm-gc (ARM only)
+- qemu-0.9.0.cvs-binfmt
+- qemu-cvs-alsa_bitfield
+- qemu-cvs-alsa_ioctl
+- qemu-cvs-alsa_mmap
+- qemu-cvs-gettimeofday
+- qemu-cvs-ioctl_debug
+- qemu-cvs-ioctl_nodirection
+- block/vmdk: Support creation of SCSI VMDK images in qemu-img
+- linux-user: add binfmt wrapper for argv[0] handling
+- PPC: KVM: Disable mmu notifier check
+- linux-user: fix segfault deadlock
+- linux-user: binfmt: support host binaries
+- linux-user: arm: no tb_flush on reset
+- linux-user: Ignore broken loop ioctl
+- linux-user: lock tcg
+- linux-user: Run multi-threaded code on a single core
+- linux-user: lock tb flushing too
+- linux-user: Fake /proc/cpuinfo
+- linux-user: implement FS_IOC_GETFLAGS ioctl
+- linux-user: implement FS_IOC_SETFLAGS ioctl
+- linux-user: XXX disable fiemap
+- slirp: -nooutgoing
+- vnc: password-file= and incoming-connections=
+- linux-user: add more blk ioctls
+- linux-user: use target_ulong
+- block: Add support for DictZip enabled gzip files
+- block: Add tar container format
+- Legacy Patch kvm-qemu-preXX-dictzip3.patch
+- Legacy Patch kvm-qemu-preXX-report-default-mac-used.patch
+- console: add question-mark escape operator
+- Make char muxer more robust wrt small FIFOs
+- linux-user: lseek: explicitly cast non-set offsets to signed
+- virtfs-proxy-helper: Provide __u64 for broken sys/capability.h
+- configure: Enable PIE for ppc and ppc64 hosts
+- xen_disk: add discard support
+- tests: Don't run qom-test twice
+- qtest: Assure that init_socket()'s listen() does not fail
+- qtest: Add error reporting to socket_accept()
+- qtest: Increase socket timeout
+- qtest: Be paranoid about accept() addrlen argument
+- arm: translate.c: Fix smlald Instruction
+- target-arm: A64: fix unallocated test of scalar SQXTUN
+- tcg-ppc64: Support the ELFv2 ABI
+- vmstate: add VMS_MUST_EXIST
+- vmstate: add VMSTATE_VALIDATE
+- virtio-net: fix buffer overflow on invalid state load
+- virtio-net: out-of-bounds buffer write on invalid state load
+- virtio: out-of-bounds buffer write on invalid state load
+- ahci: fix buffer overrun on invalid state load
+- hpet: fix buffer overrun on invalid state load
+- hw/pci/pcie_aer.c: fix buffer overruns on invalid state load
+- pl022: fix buffer overun on invalid state load
+- vmstate: fix buffer overflow in target-arm/machine.c
+- virtio: avoid buffer overrun on incoming migration
+- virtio: validate num_sg when mapping
+- pxa2xx: avoid buffer overrun on incoming migration
+- ssd0323: fix buffer overun on invalid state load
+- tsc210x: fix buffer overrun on invalid state load
+- zaurus: fix buffer overrun on invalid state load
+- virtio-scsi: fix buffer overrun on invalid state load
+- vmstate: s/VMSTATE_INT32_LE/VMSTATE_INT32_POSITIVE_LE/
+- usb: sanity check setup_index+setup_len in post_load
+- savevm: Ignore minimum_version_id_old if there is no load_state_old
+- ssi-sd: fix buffer overrun on invalid state load
+- openpic: avoid buffer overrun on incoming migration
+- virtio-net: out-of-bounds buffer write on load
+- virtio: validate config_len on load
+- virtio: allow mapping up to max queue size
+
+* Wed Aug 28 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130828.112706@2c24165
+- add baselibs.conf
+- fixed group and license
+- resetting manifest requested domain to floor
+
+* Sat May 11 2013 Anas Nashif <anas.nashif@intel.com> submit/tizen/20130509.183841@5388c0d
+- Set license using %license
+
+* Wed Apr 17 2013 Patrick McCarty <patrick.mccarty@linux.intel.com> 1127a7e
+- (TZPC-970) Enable SDL display support
+
+* Tue Jan 15 2013 Anas Nashif <anas.nashif@intel.com> upstream/1.3.0@4698b64
+- Update to 1.3
+
