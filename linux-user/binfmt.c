@@ -15,6 +15,7 @@ int main(int argc, char **argv, char **envp)
 {
     char *binfmt;
     char **new_argv;
+    fprintf(stdout, "Binfmt started!\n");
 
     /*
      * Check if our file name ends with -binfmt
@@ -36,7 +37,7 @@ int main(int argc, char **argv, char **envp)
 #ifdef ARCH_NAME
     {
         char *hostbin;
-        char *guestarch;
+	char *guestarch;
 
         guestarch = strrchr(argv[0], '-') ;
         if (!guestarch) {
@@ -44,12 +45,16 @@ int main(int argc, char **argv, char **envp)
         }
         guestarch++;
         asprintf(&hostbin, "/emul/" ARCH_NAME "-for-%s/%s", guestarch, argv[1]);
+		fprintf(stdout, "Host binary:%s\n",hostbin);
         if (!access(hostbin, X_OK)) {
             /*
              * We found a host binary replacement for the non-host binary. Let's
              * use that instead!
              */
-            return execve(hostbin, &argv[2], envp);
+            fprintf(stdout, "Running host binary\n");
+            int ret = execve(hostbin, &argv[2], envp);
+            fprintf(stdout, "Host binary returned\n");
+            return ret;
         }
     }
 skip:
@@ -64,6 +69,10 @@ skip:
     new_argv[2] = argv[2];
     new_argv[3] = argv[1];
     new_argv[argc + 1] = NULL;
+    fprintf(stdout, "Running qemu:%s %s %s %s\n",new_argv[0], new_argv[1],
+        new_argv[2],new_argv[3]);
 
-    return execve(new_argv[0], new_argv, envp);
+    int ret = execve(new_argv[0], new_argv, envp);
+    fprintf(stdout, "Qemu returned\n");
+    return ret;
 }
