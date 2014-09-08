@@ -203,6 +203,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %_bindir/qemu-or32
 %_bindir/qemu-ppc64abi32
 %_bindir/qemu-ppc64
+%_bindir/qemu-ppc64le
 %_bindir/qemu-ppc
 %_bindir/qemu-s390x
 %_bindir/qemu-sh4
