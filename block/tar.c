@@ -83,8 +83,7 @@ static int str_ends(char *str, const char *end)
     return !strncmp(str + str_len - end_len, end, end_len);
 }
 
-static int is_target_file(BlockDriverState *bs, char *filename,
-                          char *header)
+static int is_target_file(BlockDriverState *bs, char *filename)
 {
     int retval = 0;
 
@@ -100,17 +99,10 @@ static int is_target_file(BlockDriverState *bs, char *filename,
     if (str_ends(filename, ".vmdk"))
         retval = 1;
 
-    if (retval &&
-        (header[OFFS_TYPE] != '0') &&
-        (header[OFFS_TYPE] != 'S')) {
-        retval = 0;
-    }
-
     dprintf("does filename %s match? %s\n", filename, retval ? "yes" : "no");
 
     /* make sure we're not using this name again */
     filename[0] = '\0';
-
     return retval;
 }
 
@@ -186,7 +178,7 @@ static int tar_open(BlockDriverState *bs, QDict *options, int flags, Error **err
 
     opts = qemu_opts_create(&runtime_opts, NULL, 0, &error_abort);
     qemu_opts_absorb_qdict(opts, options, &local_err);
-    if (error_is_set(&local_err)) {
+    if (local_err != NULL) {
         error_propagate(errp, local_err);
         ret = -EINVAL;
         goto fail;
@@ -237,13 +229,12 @@ static int tar_open(BlockDriverState *bs, QDict *options, int flags, Error **err
             bdrv_pread(s->hd, header_offs - s->file_len, s->longfile,
                        sizeof(s->longfile));
             s->longfile[sizeof(s->longfile)-1] = '\0';
-            real_file = header;
         } else if (s->longfile[0]) {
             real_file = s->longfile;
         } else {
             real_file = header;
         }
-    } while(!is_target_file(bs, real_file, header));
+    } while(!is_target_file(bs, real_file));
 
     /* We found an image! */
 
