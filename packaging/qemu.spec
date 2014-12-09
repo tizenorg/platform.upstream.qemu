@@ -146,6 +146,7 @@ ln -sf ../../../emul/ia32-linux $RPM_BUILD_ROOT/usr/share/qemu/qemu-i386
 mkdir -p $RPM_BUILD_ROOT/emul/ia32-linux
 %endif
 ln -sf /%_bindir/qemu-aarch64 $RPM_BUILD_ROOT/%_bindir/qemu-arm64
+ln -sf /%_bindir/qemu-aarch64-binfmt $RPM_BUILD_ROOT/%_bindir/qemu-arm64-binfmt
 %fdupes -s $RPM_BUILD_ROOT
 
 %clean
