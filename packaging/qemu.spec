@@ -3,7 +3,7 @@ Url:            http://www.qemu.org/
 Summary:        Universal CPU emulator
 License:        BSD-3-Clause and GPL-2.0 and GPL-2.0+ and LGPL-2.1+ and MIT
 Group:          System/Utilities
-Version:        2.1.0
+Version:        2.2.0
 Release:        0
 Source:         %name-%version.tar.bz2
 # this is to make lint happy
