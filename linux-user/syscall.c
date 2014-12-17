@@ -8127,6 +8127,10 @@ abi_long do_syscall(void *cpu_env, int num, abi_ulong arg1,
             arg4 = arg5;
             arg5 = arg6;
         }
+        if (!arg3) {
+            ret = 0;
+            break;
+        }
         if (!(p = lock_user(VERIFY_WRITE, arg2, arg3, 0)))
             goto efault;
         ret = get_errno(pread64(arg1, p, arg3, target_offset64(arg4, arg5)));
@@ -8136,6 +8140,10 @@ abi_long do_syscall(void *cpu_env, int num, abi_ulong arg1,
         if (regpairs_aligned(cpu_env)) {
             arg4 = arg5;
             arg5 = arg6;
+        }
+        if (!arg3) {
+            ret = 0;
+            break;
         }
         if (!(p = lock_user(VERIFY_READ, arg2, arg3, 1)))
             goto efault;
