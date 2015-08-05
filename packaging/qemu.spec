@@ -10,7 +10,6 @@ Source:         %name-%version.tar.bz2
 Source300:      rpmlintrc
 Source302:      bridge.conf
 Source303:      baselibs.conf
-Source400:      update_git.sh
 BuildRequires:  bison
 #BuildRequires:  curl-devel
 BuildRequires:  e2fsprogs-devel
