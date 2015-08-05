@@ -145,8 +145,18 @@ ln -sf ../../../emul/ia32-linux $RPM_BUILD_ROOT/usr/share/qemu/qemu-i386
 %ifnarch ia64
 mkdir -p $RPM_BUILD_ROOT/emul/ia32-linux
 %endif
-ln -sf /%_bindir/qemu-aarch64 $RPM_BUILD_ROOT/%_bindir/qemu-arm64
-ln -sf /%_bindir/qemu-aarch64-binfmt $RPM_BUILD_ROOT/%_bindir/qemu-arm64-binfmt
+# add compatibility symlinks
+ln -sf qemu-aarch64 $RPM_BUILD_ROOT/%_bindir/qemu-arm64
+ln -sf qemu-aarch64-binfmt $RPM_BUILD_ROOT/%_bindir/qemu-arm64-binfmt
+ln -sf qemu-arm $RPM_BUILD_ROOT/%_bindir/qemu-arm-static
+ln -sf qemu-aarch64 $RPM_BUILD_ROOT/%_bindir/qemu-aarch64-static
+mkdir -p $RPM_BUILD_ROOT/qemu
+for arch in arm{,64} aarch64;
+do
+  ln -sf %{_bindir}/qemu-$arch $RPM_BUILD_ROOT/qemu/qemu-$arch
+  ln -sf %{_bindir}/qemu-$arch-binfmt $RPM_BUILD_ROOT/qemu/qemu-$arch-binfmt
+done
+
 %fdupes -s $RPM_BUILD_ROOT
 
 %clean
@@ -217,6 +227,8 @@ rm -rf ${RPM_BUILD_ROOT}
 %_bindir/qemu-unicore32
 %_bindir/qemu-x86_64
 %_bindir/qemu-*-binfmt
+%_bindir/qemu-*-static
+/qemu/*
 %_sbindir/qemu-binfmt-conf.sh
 
 %changelog
