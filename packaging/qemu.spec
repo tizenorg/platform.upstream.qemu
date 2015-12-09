@@ -34,7 +34,7 @@ BuildRequires:  fdupes
 BuildRequires:  glib2-devel
 BuildRequires:  pwdutils
 BuildRequires:  python
-BuildRequires:  pkgconfig(sdl)
+#BuildRequires:  pkgconfig(sdl)
 Requires:       /usr/sbin/groupadd
 Requires:       pwdutils
 Requires:       timezone
@@ -104,8 +104,8 @@ mkdir -p dynamic
 	--disable-linux-aio \
 	--extra-cflags="$QEMU_OPT_FLAGS" \
 	--enable-system \
-	--disable-linux-user \
-	--enable-sdl
+	--disable-linux-user #\
+#	--enable-sdl
 
 make %{?jobs:-j%jobs} V=1
 mv *-softmmu/qemu-system-* dynamic
