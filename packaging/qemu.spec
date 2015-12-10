@@ -12,15 +12,15 @@ Source302:      bridge.conf
 Source303:      baselibs.conf
 Source400:      update_git.sh
 BuildRequires:  bison
-BuildRequires:  curl-devel
+#BuildRequires:  curl-devel
 BuildRequires:  e2fsprogs-devel
 BuildRequires:  libattr-devel
 BuildRequires:  libcap-devel
 BuildRequires:  libcap-ng-devel
 BuildRequires:  libgnutls-devel
 BuildRequires:  libjpeg8-devel
-BuildRequires:  libpng-devel
-BuildRequires:  ncurses-devel
+#BuildRequires:  libpng-devel
+#BuildRequires:  ncurses-devel
 # we must not install the qemu package when under qemu build
 %if 0%{?qemu_user_space_build:1}
 BuildRequires:  -post-build-checks
@@ -98,7 +98,6 @@ mkdir -p dynamic
 ./configure --prefix=%_prefix \
 	--sysconfdir=%_sysconfdir \
 	--libexecdir=%_libexecdir \
-	--enable-curl \
 	--enable-virtfs \
 	--enable-attr \
 	--disable-linux-aio \
