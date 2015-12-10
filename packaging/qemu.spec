@@ -15,10 +15,10 @@ BuildRequires:  bison
 #BuildRequires:  curl-devel
 BuildRequires:  e2fsprogs-devel
 BuildRequires:  libattr-devel
-BuildRequires:  libcap-devel
-BuildRequires:  libcap-ng-devel
-BuildRequires:  libgnutls-devel
-BuildRequires:  libjpeg8-devel
+#BuildRequires:  libcap-devel
+#BuildRequires:  libcap-ng-devel
+#BuildRequires:  libgnutls-devel
+#BuildRequires:  libjpeg8-devel
 #BuildRequires:  libpng-devel
 #BuildRequires:  ncurses-devel
 # we must not install the qemu package when under qemu build
@@ -32,7 +32,7 @@ BuildRequires:  glib2-devel-static
 BuildRequires:  pcre-devel-static
 BuildRequires:  fdupes
 BuildRequires:  glib2-devel
-BuildRequires:  pwdutils
+#BuildRequires:  pwdutils
 BuildRequires:  python
 #BuildRequires:  pkgconfig(sdl)
 Requires:       /usr/sbin/groupadd
@@ -98,20 +98,17 @@ mkdir -p dynamic
 ./configure --prefix=%_prefix \
 	--sysconfdir=%_sysconfdir \
 	--libexecdir=%_libexecdir \
-	--enable-virtfs \
 	--enable-attr \
 	--disable-linux-aio \
 	--extra-cflags="$QEMU_OPT_FLAGS" \
 	--enable-system \
-	--disable-linux-user #\
-#	--enable-sdl
+	--disable-linux-user 
 
 make %{?jobs:-j%jobs} V=1
 mv *-softmmu/qemu-system-* dynamic
 mv qemu-io qemu-img qemu-nbd qemu-bridge-helper dynamic
 #mv qemu-img.1 qemu-nbd.8 dynamic
 mv qemu-ga dynamic
-mv fsdev/virtfs-proxy-helper dynamic
 make clean
 # build userland emus
 ./configure --prefix=%_prefix --sysconfdir=%_sysconfdir \
@@ -131,7 +128,6 @@ install -m 755 dynamic/qemu-io $RPM_BUILD_ROOT/%_bindir
 install -m 755 dynamic/qemu-img $RPM_BUILD_ROOT/%_bindir
 install -m 755 dynamic/qemu-nbd $RPM_BUILD_ROOT/%_bindir
 install -m 755 dynamic/qemu-ga $RPM_BUILD_ROOT/%_bindir
-install -m 755 dynamic/virtfs-proxy-helper $RPM_BUILD_ROOT/%_bindir
 install -d -m 755 $RPM_BUILD_ROOT/%_sbindir
 install -m 755 scripts/qemu-binfmt-conf.sh $RPM_BUILD_ROOT/%_sbindir
 install -d -m 755 $RPM_BUILD_ROOT/%_libexecdir
@@ -175,7 +171,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %_bindir/qemu-io
 %_bindir/qemu-img
 %_bindir/qemu-nbd
-%_bindir/virtfs-proxy-helper
 %verify(not mode) %_libexecdir/qemu-bridge-helper
 %dir %_sysconfdir/%name
 %config %_sysconfdir/%name/bridge.conf
