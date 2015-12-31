@@ -35,8 +35,8 @@ BuildRequires:  glib2-devel
 #BuildRequires:  pwdutils
 BuildRequires:  python
 #BuildRequires:  pkgconfig(sdl)
-Requires:       /usr/sbin/groupadd
-Requires:       pwdutils
+#Requires:       /usr/sbin/groupadd
+#Requires:       pwdutils
 Requires:       timezone
 
 %description
