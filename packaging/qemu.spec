@@ -37,6 +37,8 @@ BuildRequires:  python
 #Requires:       /usr/sbin/groupadd
 #Requires:       pwdutils
 Requires:       timezone
+BuildRequires: -post-build-checks
+BuildRequires: rpm-build automake autoconf libtool
 
 %description
 QEMU is an extremely well-performing CPU emulator that allows you to
@@ -164,7 +166,7 @@ rm -rf ${RPM_BUILD_ROOT}
   -c "qemu user" qemu
 
 %files
-%license COPYING
+#%license COPYING
 %defattr(-, root, root)
 %doc COPYING COPYING.LIB Changelog README VERSION
 %_bindir/qemu-system-*
