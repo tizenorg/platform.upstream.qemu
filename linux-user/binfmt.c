@@ -4,6 +4,7 @@
 #include <libgen.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
 
 
 int main(int argc, char **argv, char **envp)
@@ -29,10 +30,22 @@ int main(int argc, char **argv, char **envp)
     /* Now argv[0] is the real qemu binary name */
 
     {
-        char *hostbin;
+        int len;
         int r;
+        char buf[PATH_MAX];
+        char *hostbin;
+        char *path;
 
-        r = asprintf(&hostbin, "/emul/%s", argv[1]);
+        path = argv[1];
+
+        /* Follow symbolic link if any. */
+        len = readlink(path, buf, sizeof(buf) - 1);
+        if (len > 0) {
+            buf[len] = 0;
+            path = buf;
+        }
+
+        r = asprintf(&hostbin, "/emul/%s", path);
         if (!access(hostbin, X_OK) && (r > 0)) {
             /*
              * We found a host binary replacement for the non-host binary. Let's
